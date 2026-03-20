@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVOMA x BOTE — Proposition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0A0A0E;
+            --surface: #131317;
+            --surface-2: #1A1A1F;
+            --border: #222228;
+            --border-hover: #333339;
+            --text: #EEEEF2;
+            --text-sec: #94949C;
+            --text-mute: #5A5A64;
+            --gold: #C8A96E;
+            --gold-light: #D4BC8A;
+            --gold-dim: rgba(200,169,110,0.10);
+            --gold-dim-2: rgba(200,169,110,0.06);
+            --gold-border: rgba(200,169,110,0.22);
+            --r: 12px;
+            --r-sm: 8px;
+            --ease: cubic-bezier(0.16,1,0.3,1);
+            --ease-out: cubic-bezier(0.33,1,0.68,1);
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box}
+        ::selection{background:rgba(200,169,110,0.3);color:var(--text)}
+        html,body{height:100%;overflow:hidden}
+
+        body{
+            font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+        }
+
+        /* Subtle grain overlay */
+        body::after{
+            content:'';position:fixed;inset:0;opacity:0.015;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            pointer-events:none;z-index:50;
+        }
+
+        /* Ambient glow */
+        .glow{
+            position:fixed;top:-30vh;left:50%;transform:translateX(-50%);
+            width:80vw;height:60vh;
+            background:radial-gradient(ellipse,rgba(200,169,110,0.04) 0%,transparent 70%);
+            pointer-events:none;z-index:0;
+        }
+
+        /* Progress bar */
+        .progress{
+            position:fixed;top:0;left:0;height:2px;
+            background:linear-gradient(90deg,var(--gold),var(--gold-light));
+            box-shadow:0 0 16px rgba(200,169,110,0.25);
+            transition:width 0.6s var(--ease);z-index:200;
+        }
+
+        /* Brand */
+        .brand{
+            position:fixed;top:2rem;right:3rem;
+            font-size:0.6rem;font-weight:700;letter-spacing:0.25em;
+            color:var(--text-mute);z-index:100;
+            opacity:0.7;
+        }
+
+        /* Deck & Slides */
+        .deck{position:relative;width:100vw;height:100vh;z-index:1}
+
+        .slide{
+            position:absolute;inset:0;
+            display:flex;align-items:center;justify-content:center;
+            padding:4.5rem 4rem 5.5rem;
+            opacity:0;pointer-events:none;
+            transition:opacity 0.55s ease;
+        }
+        .slide.active{opacity:1;pointer-events:auto}
+        .slide-inner{width:100%;max-width:880px}
+
+        /* Reveal animations */
+        .rv{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.8s var(--ease)}
+        .slide.active .rv{opacity:1;transform:translateY(0)}
+        .slide.active .rv.d1{transition-delay:.06s}
+        .slide.active .rv.d2{transition-delay:.12s}
+        .slide.active .rv.d3{transition-delay:.20s}
+        .slide.active .rv.d4{transition-delay:.28s}
+        .slide.active .rv.d5{transition-delay:.36s}
+        .slide.active .rv.d6{transition-delay:.44s}
+
+        @media(prefers-reduced-motion:reduce){
+            .rv{transition:none!important;opacity:1!important;transform:none!important}
+            .slide,.progress,.accent-bar{transition:none!important}
+        }
+
+        /* ── TITLE SLIDE ── */
+        .tc{text-align:center}
+        .title-main{
+            font-size:clamp(2.6rem,7.5vw,5rem);
+            font-weight:200;letter-spacing:-0.045em;line-height:1;
+        }
+        .title-main em{font-style:normal;font-weight:600;color:var(--gold)}
+        .title-x{font-weight:300;color:var(--text-mute);padding:0 0.15em}
+        .accent-bar{
+            width:0;height:2px;
+            background:linear-gradient(90deg,transparent,var(--gold),transparent);
+            margin:2.25rem auto;
+            transition:width 1s var(--ease) 0.3s;
+        }
+        .slide.active .accent-bar{width:80px}
+        .title-sub{
+            font-size:clamp(0.72rem,1.4vw,0.88rem);
+            font-weight:500;letter-spacing:0.22em;text-transform:uppercase;
+            color:var(--text-mute);
+        }
+        .title-date{
+            font-size:0.72rem;color:var(--text-mute);margin-top:1.75rem;
+            letter-spacing:0.06em;opacity:0.6;
+        }
+
+        /* ── SECTION ELEMENTS ── */
+        .tag{
+            font-size:0.6rem;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;
+            color:var(--gold);margin-bottom:0.6rem;
+            display:inline-flex;align-items:center;gap:0.5rem;
+        }
+        .tag::before{content:'';width:12px;height:1px;background:var(--gold);display:block}
+        .heading{
+            font-size:clamp(1.7rem,3.8vw,2.6rem);font-weight:300;
+            letter-spacing:-0.03em;line-height:1.15;margin-bottom:0.75rem;
+        }
+        .heading strong{font-weight:700}
+        .desc{font-size:0.9rem;line-height:1.75;color:var(--text-sec);max-width:620px}
+        .desc strong{color:var(--text);font-weight:600}
+
+        /* ── SCOPE CARDS ── */
+        .scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:1.75rem}
+        .scope-card{
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:var(--r);padding:1.5rem 1.4rem;
+            position:relative;overflow:hidden;
+            transition:border-color .35s,transform .35s var(--ease);
+        }
+        .scope-card::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:1px;
+            background:linear-gradient(90deg,transparent,var(--gold-border),transparent);
+            opacity:0;transition:opacity .35s;
+        }
+        .scope-card:hover{border-color:var(--border-hover);transform:translateY(-2px)}
+        .scope-card:hover::before{opacity:1}
+        .sc-num{
+            font-size:0.55rem;font-weight:700;letter-spacing:0.15em;
+            color:var(--gold);opacity:0.5;margin-bottom:0.75rem;
+        }
+        .sc-title{font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:0.35rem}
+        .sc-desc{font-size:0.72rem;line-height:1.65;color:var(--text-sec)}
+
+        /* ── TIMELINE ── */
+        .timeline{margin-top:1.75rem;position:relative;padding-left:1.75rem}
+        .timeline::before{
+            content:'';position:absolute;left:3px;top:6px;bottom:6px;
+            width:1px;background:linear-gradient(180deg,var(--gold-border),var(--border));
+        }
+        .tl-item{position:relative;padding-bottom:1.75rem}
+        .tl-item:last-child{padding-bottom:0}
+        .tl-dot{
+            position:absolute;left:-1.47rem;top:4px;
+            width:7px;height:7px;border-radius:50%;
+            background:var(--gold);
+            box-shadow:0 0 10px rgba(200,169,110,0.25);
+        }
+        .tl-week{
+            font-size:0.6rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+            color:var(--gold);margin-bottom:.3rem;
+        }
+        .tl-title{font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:.2rem}
+        .tl-desc{font-size:0.78rem;line-height:1.65;color:var(--text-sec)}
+
+        /* ── CHECKLIST ── */
+        .checklist{margin-top:1.5rem;display:flex;flex-direction:column;gap:0.4rem}
+        .check-item{
+            display:flex;align-items:flex-start;gap:0.85rem;
+            padding:0.9rem 1.25rem;
+            background:var(--surface);border:1px solid var(--border);
+            border-radius:var(--r-sm);
+            transition:border-color .3s;
+        }
+        .check-item:hover{border-color:var(--border-hover)}
+        .check-icon{
+            width:18px;height:18px;border-radius:50%;
+            background:var(--gold-dim);border:1px solid var(--gold-border);
+            display:flex;align-items:center;justify-content:center;
+            flex-shrink:0;margin-top:1px;
+            font-size:0.55rem;color:var(--gold);
+        }
+        .check-text{font-size:0.82rem;line-height:1.55;color:var(--text-sec)}
+        .check-text strong{color:var(--text);font-weight:600}
+
+        /* ── OFFER CARD ── */
+        .offer-main{
+            background:var(--surface);
+            border:1px solid var(--gold-border);
+            border-radius:var(--r);
+            padding:2.5rem 2.25rem;margin-top:1.75rem;
+            position:relative;overflow:hidden;
+        }
+        .offer-main::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:1px;
+            background:linear-gradient(90deg,transparent 5%,var(--gold) 50%,transparent 95%);
+        }
+        .offer-main::after{
+            content:'';position:absolute;top:0;right:0;width:200px;height:200px;
+            background:radial-gradient(circle at top right,rgba(200,169,110,0.04),transparent 70%);
+            pointer-events:none;
+        }
+        .offer-eyebrow{
+            font-size:0.58rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+            color:var(--gold);opacity:0.7;margin-bottom:0.5rem;
+        }
+        .offer-name{font-size:1.15rem;font-weight:600;color:var(--text);margin-bottom:1.5rem}
+        .offer-price-row{display:flex;align-items:baseline;gap:0.5rem}
+        .offer-price{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;color:var(--gold);line-height:1}
+        .offer-price-unit{font-size:0.85rem;font-weight:500;color:var(--text-mute)}
+        .offer-divider{height:1px;background:var(--border);margin:1.75rem 0}
+        .offer-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem 1.5rem}
+        .offer-inc{
+            font-size:0.76rem;color:var(--text-sec);
+            display:flex;align-items:flex-start;gap:0.6rem;
+            line-height:1.5;
+        }
+        .offer-bullet{
+            width:4px;height:4px;border-radius:50%;background:var(--gold);
+            margin-top:0.45rem;flex-shrink:0;
+        }
+
+        /* ── ADDONS ── */
+        .addons{margin-top:1.5rem;display:flex;flex-direction:column;gap:0.6rem}
+        .addon{
+            background:var(--surface);border:1px solid var(--border);
+            border-radius:var(--r-sm);padding:1.15rem 1.4rem;
+            display:flex;justify-content:space-between;align-items:center;
+            transition:border-color .3s;
+        }
+        .addon:hover{border-color:var(--border-hover)}
+        .addon-left{flex:1}
+        .addon-name{font-size:0.85rem;font-weight:600;color:var(--text)}
+        .addon-desc{font-size:0.68rem;color:var(--text-mute);margin-top:.2rem;line-height:1.5}
+        .addon-price{
+            font-size:0.95rem;font-weight:700;color:var(--text);
+            white-space:nowrap;margin-left:1.5rem;
+        }
+        .addon-price span{font-size:0.65rem;font-weight:400;color:var(--text-mute)}
+
+        /* ── CREDITS TABLE ── */
+        .credits-block{margin-top:1.75rem}
+        .credits-desc{font-size:0.82rem;line-height:1.7;color:var(--text-sec);margin-bottom:1.25rem}
+        .credits-desc strong{color:var(--text);font-weight:600}
+        .credits-examples{
+            background:var(--surface);border:1px solid var(--border);
+            border-radius:var(--r);overflow:hidden;
+        }
+        .ce-row{
+            display:flex;justify-content:space-between;align-items:center;
+            padding:0.85rem 1.4rem;border-bottom:1px solid var(--border);
+        }
+        .ce-row:last-child{border-bottom:none}
+        .ce-label{font-size:0.8rem;color:var(--text-sec)}
+        .ce-value{
+            font-size:0.75rem;font-weight:600;color:var(--gold);
+            background:var(--gold-dim);
+            padding:0.2rem 0.6rem;border-radius:20px;
+        }
+
+        /* ── RECAP ── */
+        .recap-total{
+            margin-top:2rem;
+            background:var(--gold-dim);border:1px solid var(--gold-border);
+            border-radius:var(--r);padding:1.5rem 1.75rem;
+            display:flex;justify-content:space-between;align-items:center;
+        }
+        .recap-total-left{}
+        .recap-total-label{
+            font-size:0.6rem;font-weight:700;letter-spacing:0.18em;
+            text-transform:uppercase;color:var(--gold);
+        }
+        .recap-total-sub{font-size:0.7rem;color:var(--text-mute);margin-top:.2rem}
+        .recap-total-amt{font-size:1.6rem;font-weight:800;color:var(--gold)}
+
+        /* ── CTA SLIDE ── */
+        .cta-block{margin-top:2.5rem}
+        .cta-text{
+            font-size:0.88rem;color:var(--text-sec);line-height:1.75;
+            text-align:center;max-width:500px;margin:0 auto 2rem;
+        }
+        .cta-cards{display:flex;justify-content:center;gap:1rem}
+        .cta-card{
+            background:var(--surface);border:1px solid var(--border);
+            border-radius:var(--r);padding:1.5rem 2rem;text-align:center;
+            min-width:180px;
+            transition:border-color .3s;
+        }
+        .cta-card:hover{border-color:var(--gold-border)}
+        .cta-name{font-size:0.88rem;font-weight:600;color:var(--text)}
+        .cta-role{font-size:0.68rem;color:var(--text-mute);margin-top:.25rem}
+
+        /* ── NAV ── */
+        .nav{
+            position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%);
+            display:flex;align-items:center;gap:.6rem;z-index:100;
+            background:rgba(20,20,24,0.85);backdrop-filter:blur(12px);
+            border:1px solid var(--border);border-radius:100px;
+            padding:0.35rem 0.5rem;
+        }
+        .nav-btn{
+            width:2rem;height:2rem;border:none;
+            border-radius:50%;background:transparent;color:var(--text-mute);
+            cursor:pointer;display:flex;align-items:center;justify-content:center;
+            font-size:0.8rem;transition:all .2s ease;-webkit-tap-highlight-color:transparent;
+        }
+        .nav-btn:hover{color:var(--gold);background:var(--gold-dim)}
+        .nav-btn:active{transform:scale(0.9)}
+
+        .dots{display:flex;gap:.35rem;padding:0 0.25rem}
+        .dot{
+            width:6px;height:6px;border-radius:50%;background:var(--border);
+            cursor:pointer;transition:all .35s var(--ease);
+        }
+        .dot.on{
+            background:var(--gold);width:20px;border-radius:3px;
+            box-shadow:0 0 8px rgba(200,169,110,0.3);
+        }
+
+        .counter{
+            position:fixed;bottom:2rem;right:3rem;
+            font-size:0.65rem;font-weight:500;letter-spacing:.1em;color:var(--text-mute);
+            z-index:100;opacity:0.5;
+        }
+        .counter .c{color:var(--text-sec);font-weight:600}
+
+        /* Scrollable for mobile */
+        .slide.scrollable{overflow-y:auto}
+        .slide.scrollable .slide-inner{padding-bottom:2rem}
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px){
+            .slide{padding:3.5rem 2.5rem 5rem}
+            .brand{top:1.5rem;right:2rem}
+        }
+
+        @media(max-width:680px){
+            .slide{padding:2.5rem 1.5rem 4rem;align-items:flex-start;overflow-y:auto}
+            .brand{top:1.25rem;right:1.5rem;font-size:.55rem}
+            .heading{font-size:1.45rem;margin-bottom:.6rem}
+            .desc{font-size:.82rem}
+            .scope-grid{grid-template-columns:1fr;gap:.6rem;margin-top:1.25rem}
+            .offer-grid{grid-template-columns:1fr}
+            .offer-main{padding:1.75rem 1.5rem}
+            .cta-cards{flex-direction:column;align-items:center;gap:.75rem}
+            .nav{bottom:1rem;padding:0.3rem 0.4rem}
+            .counter{bottom:1.25rem;right:1.5rem}
+        }
+
+        @media(max-width:440px){
+            .slide{padding:2rem 1.25rem 3.5rem}
+            .title-main{font-size:2.2rem}
+            .heading{font-size:1.25rem}
+            .offer-price{font-size:2rem}
+            .addons .addon{flex-direction:column;align-items:flex-start;gap:.5rem}
+            .addon-price{margin-left:0}
+            .brand,.counter{display:none}
+            .recap-total{flex-direction:column;align-items:flex-start;gap:.35rem;padding:1rem 1.25rem}
+            .recap-total-amt{font-size:1.3rem}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow"></div>
+    <div class="progress" id="progress"></div>
+    <div class="brand">BOTE.</div>
+
+    <div class="deck">
+
+        <!-- ━━━ 1. TITLE ━━━ -->
+        <div class="slide active">
+            <div class="slide-inner tc">
+                <h1 class="title-main rv"><em>Novoma</em> <span class="title-x">x</span> Bote</h1>
+                <div class="accent-bar"></div>
+                <div class="title-sub rv d2">Retention Marketing Management</div>
+                <div class="title-date rv d3">Mars 2026</div>
+            </div>
+        </div>
+
+        <!-- ━━━ 2. SCOPE ━━━ -->
+        <div class="slide scrollable">
+            <div class="slide-inner">
+                <div class="tag rv">Scope</div>
+                <h2 class="heading rv d1">Accompagnement <strong>Retention 360</strong></h2>
+                <p class="desc rv d2">On reprend en main l'ensemble du CRM : production, strategie, data. Vous gardez la vision, on execute et on challenge.</p>
+                <div class="scope-grid rv d3">
+                    <div class="scope-card">
+                        <div class="sc-num">01</div>
+                        <div class="sc-title">Production CRM</div>
+                        <div class="sc-desc">Newsletters, flows, popups, WhatsApp. Strat, copy, design, integration, QA, tracking. Vous validez, on livre.</div>
+                    </div>
+                    <div class="scope-card">
+                        <div class="sc-num">02</div>
+                        <div class="sc-title">Strategie avancee</div>
+                        <div class="sc-desc">Cohortes, holdout tests, segmentation, zero party data. Reprise des flows proprement, sans black box.</div>
+                    </div>
+                    <div class="scope-card">
+                        <div class="sc-num">03</div>
+                        <div class="sc-title">Consulting retention</div>
+                        <div class="sc-desc">Customer Journey Mapping, benchmarks, product roadmap, deep data dive. On vous challenge sur les sujets qui comptent.</div>
+                    </div>
+                    <div class="scope-card">
+                        <div class="sc-num">04</div>
+                        <div class="sc-title">Ecosysteme</div>
+                        <div class="sc-desc">Interfacage Reach, gestion Recharge, outils tiers. On s'integre a votre stack et on echange avec vos partenaires.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ━━━ 3. ROADMAP ━━━ -->
+        <div class="slide scrollable">
+            <div class="slide-inner">
+                <div class="tag rv">Onboarding</div>
+                <h2 class="heading rv d1">Les 4 premieres <strong>semaines</strong></h2>
+                <div class="timeline rv d2">
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-week">S1</div>
+                        <div class="tl-title">Kick-off &amp; quick wins</div>
+                        <div class="tl-desc">Onboarding, acces, call kick-off. Welcome Flow &amp; Popups lances en parallele.</div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-week">S2 — S3</div>
+                        <div class="tl-title">Audit &amp; premieres campagnes</div>
+                        <div class="tl-desc">Audit flows, campagnes, segmentation. Cohortes, LTV, product journeys. Run en parallele.</div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-week">Fin M1</div>
+                        <div class="tl-title">Roadmap 3-6 mois</div>
+                        <div class="tl-desc">Customer Journey Mapping, priorisation des chantiers. Validation ensemble, puis sprints de 4 semaines.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ━━━ 4. ORGANISATION ━━━ -->
+        <div class="slide scrollable">
+            <div class="slide-inner">
+                <div class="tag rv">Organisation</div>
+                <h2 class="heading rv d1">Comment on <strong>travaille</strong></h2>
+                <div class="checklist rv d2">
+                    <div class="check-item">
+                        <div class="check-icon">&#10003;</div>
+                        <div class="check-text"><strong>Monthly</strong> : call en debut de mois. Ce qu'on a implemente, resultats chiffres, plan du mois suivant.</div>
+                    </div>
+                    <div class="check-item">
+                        <div class="check-icon">&#10003;</div>
+                        <div class="check-text"><strong>Weekly</strong> : validation des campagnes de la semaine, retours sur les livrables en cours.</div>
+                    </div>
+                    <div class="check-item">
+                        <div class="check-icon">&#10003;</div>
+                        <div class="check-text"><strong>Day-to-day</strong> : Slack. Hiruni pour le run campagnes, Sebastien &amp; Martin pour la strat.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ━━━ 5. INTERFACAGE ━━━ -->
+        <div class="slide scrollable">
+            <div class="slide-inner">
+                <div class="tag rv">Interfacage</div>
+                <h2 class="heading rv d1"><strong>Interne</strong></h2>
+                <p class="desc rv d2">Louise est notre point de contact principal. On a besoin d'elle pour avancer : connaissance brand, validation des directions, inputs produit. C'est une vraie collaboration.</p>
+                <div class="checklist rv d3">
+                    <div class="check-item">
+                        <div class="check-icon">&#10003;</div>
+                        <div class="check-text"><strong>Louise</strong> : validation, inputs brand, retours produit, challenge strategique</div>
+                    </div>
+                    <div class="check-item">
+                        <div class="check-icon">&#10003;</div>
+                        <div class="check-text"><strong>Alexandre</strong> : vision globale, arbitrages, temps forts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ━━━ 5b. INTERFACAGE EXTERNE ━━━ -->
+        <div class="slide scrollable">
+            <div class="slide-inner">
+                <div class="tag rv">Interfacage</div>
+                <h2 class="heading rv d1"><strong>Externe</strong></h2>
+                <p class="desc rv d2">On s'interface directement avec vos partenaires. Pas besoin de faire le relais, on gere la coordination.</p>
+                <div class="checklist rv d3">
+                    <div class="check-item">
+                        <div class="check-icon">&#10003;</div>
+                        <div class="check-text"><strong>Reach</strong> : echanges reguliers, coordination acquisition/retention, calls tripartites sur les temps forts, partage data en live</div>
+                    </div>
+                    <div class="check-item">
+                        <div class="check-icon">&#10003;</div>
+                        <div class="check-text"><strong>Outils tiers</strong> : Recharge, tracking, integrations. On gere la partie technique</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ━━━ 6. OFFRE ━━━ -->
+        <div class="slide scrollable">
+            <div class="slide-inner">
+                <div class="tag rv">Offre</div>
+                <h2 class="heading rv d1">Retention Marketing <strong>Management</strong></h2>
+                <div class="offer-main rv d2">
+                    <div class="offer-eyebrow">Accompagnement mensuel</div>
+                    <div class="offer-name">Production + Strategie + Data</div>
+                    <div class="offer-price-row">
+                        <div class="offer-price">5 000 &#8364;</div>
+                        <div class="offer-price-unit">HT / mois</div>
+                    </div>
+                    <div class="offer-divider"></div>
+                    <div class="offer-grid">
+                        <div class="offer-inc"><div class="offer-bullet"></div>20 e-mails / mois (flows + campagnes)</div>
+                        <div class="offer-inc"><div class="offer-bullet"></div>10 credits hors-scope inclus / mois</div>
+                        <div class="offer-inc"><div class="offer-bullet"></div>Strategie retention dediee</div>
+                        <div class="offer-inc"><div class="offer-bullet"></div>Monthly reporting + KPIs</div>
+                        <div class="offer-inc"><div class="offer-bullet"></div>Deep Data Dive / Cohortes</div>
+                        <div class="offer-inc"><div class="offer-bullet"></div>Customer Journey Mapping</div>
+                        <div class="offer-inc"><div class="offer-bullet"></div>Popups, listes &amp; segmentation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ━━━ 6. CREDITS ━━━ -->
+        <div class="slide">
+            <div class="slide-inner">
+                <div class="tag rv">Hors-scope</div>
+                <h2 class="heading rv d1">Systeme de <strong>credits</strong></h2>
+                <p class="desc rv d2">Les 20 e-mails couvrent la production mensuelle. Pour tout le reste (integrations, setups techniques, audits specifiques, travail sur des outils tiers), on utilise des <strong>credits hors-scope</strong>.</p>
+                <p class="desc rv d3" style="margin-top:1rem"><strong>10 credits inclus chaque mois</strong>, non reportables. Si un mois necessite plus de volume, des packs supplementaires sont disponibles. La grille complete est detaillee dans le contrat.</p>
+            </div>
+        </div>
+
+        <!-- ━━━ 7. ADD-ONS ━━━ -->
+        <div class="slide scrollable">
+            <div class="slide-inner">
+                <div class="tag rv">Add-ons</div>
+                <h2 class="heading rv d1">Options <strong>supplementaires</strong></h2>
+                <div class="addons rv d2">
+                    <div class="addon">
+                        <div class="addon-left">
+                            <div class="addon-name">Langue supplementaire &#8212; gestion simple</div>
+                            <div class="addon-desc">Traduction prise en charge par Novoma, BOTE gere le set-up en miroir de la langue FR</div>
+                        </div>
+                        <div class="addon-price">1 500 &#8364; <span>HT / mois</span></div>
+                    </div>
+                    <div class="addon">
+                        <div class="addon-left">
+                            <div class="addon-name">Langue supplementaire &#8212; gestion complete</div>
+                            <div class="addon-desc">Copywriter dedie + strategie sur mesure adaptee au marche (ex : Italie)</div>
+                        </div>
+                        <div class="addon-price">3 000 &#8364; <span>HT / mois</span></div>
+                    </div>
+                    <div class="addon">
+                        <div class="addon-left">
+                            <div class="addon-name">Temps forts</div>
+                            <div class="addon-desc">BFCM, lancement produit, hype building. Grille degressive sur les volumes supplementaires.</div>
+                        </div>
+                        <div class="addon-price">sur devis</div>
+                    </div>
+                </div>
+                <div class="recap-total rv d3">
+                    <div class="recap-total-left">
+                        <div class="recap-total-label">Retainer mensuel</div>
+                        <div class="recap-total-sub">Sans engagement, resiliable a tout moment</div>
+                    </div>
+                    <div class="recap-total-amt">5 000 &#8364; HT</div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ━━━ 8. FIN ━━━ -->
+        <div class="slide">
+            <div class="slide-inner tc">
+                <h2 class="heading rv" style="text-align:center;font-size:clamp(1.5rem,3.5vw,2.2rem)">A dispo si vous avez <strong>des questions</strong></h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Nav pill -->
+    <div class="nav">
+        <button class="nav-btn" onclick="go(-1)" aria-label="Precedent">&#8592;</button>
+        <div class="dots" id="dots"></div>
+        <button class="nav-btn" onclick="go(1)" aria-label="Suivant">&#8594;</button>
+    </div>
+    <div class="counter"><span class="c" id="cur">01</span> / <span id="tot"></span></div>
+
+    <script>
+        const slides=document.querySelectorAll('.slide'),N=slides.length;
+        let i=0;
+        document.getElementById('tot').textContent=String(N).padStart(2,'0');
+
+        const dotsEl=document.getElementById('dots');
+        for(let d=0;d<N;d++){
+            const dot=document.createElement('div');
+            dot.className='dot'+(d===0?' on':'');
+            dot.onclick=()=>jump(d);
+            dotsEl.appendChild(dot);
+        }
+
+        function update(){
+            slides.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+            document.querySelectorAll('.dot').forEach((d,idx)=>d.classList.toggle('on',idx===i));
+            document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
+            document.getElementById('progress').style.width=((i+1)/N*100)+'%';
+        }
+
+        function go(dir){i=(i+dir+N)%N;update()}
+        function jump(idx){i=idx;update()}
+
+        document.addEventListener('keydown',e=>{
+            if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1)}
+            else if(e.key==='ArrowLeft'){e.preventDefault();go(-1)}
+            else if(e.key==='Escape'){jump(0)}
+            else if(+e.key>=1&&+e.key<=N){jump(+e.key-1)}
+        });
+
+        let tx=0;
+        document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX},{passive:true});
+        document.addEventListener('touchend',e=>{
+            const dx=e.changedTouches[0].screenX-tx;
+            if(dx<-50)go(1);else if(dx>50)go(-1);
+        });
+    </script>
+</body>
+</html>
